@@ -59,8 +59,8 @@ export default class Application extends EventEmitter {
     this._checkNext();
   }
 
-  _render({ name, terrain, population }) {
-    return `
+_render({ name, terrain, population }) {
+  return `
       <article class="media">
         <div class="media-left">
           <figure class="image is-64x64">
@@ -78,5 +78,5 @@ export default class Application extends EventEmitter {
         </div>
       </article>
       `;
-  }
+}
 }
