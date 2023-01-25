@@ -8,76 +8,75 @@ export default class Application extends EventEmitter {
     };
   }
 
-  _loading = document.querySelector(".progress");
-  _startLoading() {
-    this._loading.style.visibility = "visible";
-  }
-  _stopLoading() {
-    this._loading.style.display = "none";
-    console.log("STOP")
-  }
-
   constructor() {
     super();
-    this._load();
+
+    this._loading = document.querySelector(".progress");
+    this.apiUrl = "https://swapi.boom.dev/api/planets";
+    this._startLoading();
+    this._create();
     this.emit(Application.events.READY);
   }
 
   async _load() {
-    this._startLoading();
-    let pageNumber = 1;
-
-    // Fetch planets
-    let planets = [];
-    let response;
-    let data;
-    do {
-      if (pageNumber == 1) {
-        response = await fetch("https://swapi.boom.dev/api/planets");
-      } else {
-        response = await fetch("https://swapi.boom.dev/api/planets?page=" + pageNumber);
-      }
-      data = await response.json();
-      planets = planets.concat(data.results);
-      console.log(planets)
-      pageNumber++;
-    } while (data.next);
-
-    // Render planets
-    planets.forEach((planet) => {
-      this._create(planet);
+    return await fetch(this.apiUrl).then((response) => {
+      return response.json();
     });
-
-    this._stopLoading();
   }
 
-  _create(planet) {
-    const box = document.createElement("div");
-    box.classList.add("box");
-    box.innerHTML = this._render(planet);
-
-    document.body.querySelector(".main").appendChild(box);
+  _startLoading() {
+    this._loading.style.display = "block";
   }
 
-  _render({ name, terrain, population, url }) {
+  _stopLoading() {
+    this._loading.style.display = "none";
+  }
+
+  _checkNext() {
+    this._load().then((response) => {
+      if (response.next) {
+        console.log(response.next);
+        this.apiUrl = response.next;
+        this._create();
+      }
+    });
+  }
+
+  _create() {
+    this._load().then((response) => {
+      response.results.forEach((element) => {
+        const box = document.createElement("div");
+        box.classList.add("box");
+        box.innerHTML = this._render({
+          name: element.name,
+          terrain: element.terrain,
+          population: element.population,
+        });
+        this._stopLoading();
+        document.body.querySelector(".main").appendChild(box);
+      });
+    });
+    this._checkNext();
+  }
+
+  _render({ name, terrain, population }) {
     return `
-<article class="media">
-  <div class="media-left">
-    <figure class="image is-64x64">
-      <img src="${image}" alt="planet">
-    </figure>
-  </div>
-  <div class="media-content">
-    <div class="content">
-    <h4>${name}</h4>
-      <p>
-        <span class="tag">${terrain}</span> <span class="tag">${population}</span>
-        <br>
-      </p>
-      <p class="tag">url:<a href="${url}" target="_blank">${url}</a></p>
-    </div>
-  </div>
-</article>
-    `;
+      <article class="media">
+        <div class="media-left">
+          <figure class="image is-64x64">
+            <img src="${image}" alt="planet">
+          </figure>
+        </div>
+        <div class="media-content">
+          <div class="content">
+          <h4>${name}</h4>
+            <p>
+              <span class="tag">${terrain}</span> <span class="tag">${population}</span>
+              <br>
+            </p>
+          </div>
+        </div>
+      </article>
+      `;
   }
- }
+}
