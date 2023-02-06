@@ -1,49 +1,49 @@
 import EventEmitter from "eventemitter3";
 import image from "../images/planet.svg";
-
+ 
 export default class Application extends EventEmitter {
   static get events() {
     return {
       READY: "ready",
     };
   }
-
+ 
   constructor() {
     super();
-
+ 
     this._loading = document.querySelector(".progress");
     this.apiUrl = "https://swapi.boom.dev/api/planets";
     this._startLoading();
     this._create();
     this.emit(Application.events.READY);
   }
-
+ 
   async _load() {
     return await fetch(this.apiUrl).then((response) => {
       return response.json();
     });
   }
-
+ 
   _startLoading() {
-    this._loading.style.display = "block";
+    this._loading.style.display = 'block';
   }
-
+ 
   _stopLoading() {
-    this._loading.style.display = "none";
+    this._loading.style.display = 'none';
   }
-
+ 
   _checkNext() {
-    this._load().then((response) => {
-      if (response.next) {
+    this._load().then((response) => { 
+      if(response.next){
         console.log(response.next);
         this.apiUrl = response.next;
         this._create();
       }
     });
   }
-
+ 
   _create() {
-    this._load().then((response) => {
+    this._load().then((response) => { 
       response.results.forEach((element) => {
         const box = document.createElement("div");
         box.classList.add("box");
@@ -58,9 +58,9 @@ export default class Application extends EventEmitter {
     });
     this._checkNext();
   }
-
-  _render({ name, terrain, population }) {
-    return `
+ 
+_render({ name, terrain, population }) {
+  return `
       <article class="media">
         <div class="media-left">
           <figure class="image is-64x64">
@@ -78,5 +78,5 @@ export default class Application extends EventEmitter {
         </div>
       </article>
       `;
-  }
+}
 }
