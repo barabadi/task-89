@@ -80,3 +80,52 @@ _render({ name, terrain, population }) {
       `;
 }
 }
+import React, { useState, useEffect } from 'react';
+
+const Application = () => {
+  const [planets, setPlanets] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const _startLoading = () => {
+    setLoading(true);
+  };
+
+  const _stopLoading = () => {
+    setLoading(false);
+  };
+
+  const _create = () => {
+    return (
+      <div className="planets">
+        {planets.map((planet) => (
+          <div key={planet.name} className="planet">
+            {planet.name}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const _load = async () => {
+    _startLoading();
+
+    const res = await fetch('https://swapi.boom.dev/api/planets');
+    const data = await res.json();
+    setPlanets(data.results);
+
+    _stopLoading();
+  };
+
+  useEffect(() => {
+    _load();
+  }, []);
+
+  return (
+    <div className="app">
+      {loading && <progress className="progress" />}
+      {_create()}
+    </div>
+  );
+};
+
+export default Application;
